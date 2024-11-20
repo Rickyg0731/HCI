@@ -1,3 +1,5 @@
+import datetime
+
 import streamlit as st
 from openai import OpenAI  # Importing the client class
 import spotipy
@@ -57,7 +59,6 @@ st.markdown(
 
 # Main Content
 #st.subheader("Welcome to Spotify AI")
-color_parameter = st.color_picker("Select a Color","#00f900")
 
 st.markdown(
     """
@@ -71,7 +72,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 # Tabs
-ai_recommend, lyric_finder, music_journey = st.tabs(["AI Recommender", "Lyric Finder", "Emotion Journey"])
+ai_recommend, lyric_finder, music_journey, color_journey, date_finder = st.tabs(["AI Recommender", "Lyric Finder", "Emotion Journey", "Color Journey", "Date Finder"])
 
 # AI Recommender Tab
 with ai_recommend:
@@ -149,3 +150,41 @@ with music_journey:
             st.write("Spotify Journey Tracks:")
             for track in journey_tracks['tracks']:
                 st.write(f"{track['name']} by {', '.join([artist['name'] for artist in track['artists']])}")
+
+with color_journey:
+    color_parameter = st.color_picker("What color are you feeling?", "#00f900")
+    if color_parameter:
+        response = openai_client.chat.completions.create(
+            messages=[{
+                "role": "user",
+                "content": f"Find songs based on this color: {color_parameter}. Include genres and sample songs.",
+            }],
+            model="gpt-3.5-turbo",
+        )
+        journey = response.choices[0].message.content.strip()
+
+        genres = ["chill", "dance", "acoustic"]
+        journey_tracks = sp.recommendations(seed_genres=genres, limit=5)
+        st.write("Tracks based on your color:")
+        for track in journey_tracks['tracks']:
+            st.write(f"{track['name']} by {', '.join([artist['name'] for artist in track['artists']])}")
+
+with date_finder:
+    st.write("Find out which songs were popular on a date!")
+    yesterday = datetime.datetime.today()
+    min_date = datetime.date(yesterday.year - 70, 1, 1)
+    date = st.date_input("Enter a date:", format="MM/DD/YYYY", min_value= min_date, max_value=yesterday)
+    if date:
+        response = openai_client.chat.completions.create(
+            messages=[{
+                "role": "user",
+                "content": f"Find the most popular songs based on this date: {date}. Only give me the name of the song and the artist.",
+            }],
+            model="gpt-3.5-turbo",
+        )
+        song_of_the_day = response.choices[0].message.content.strip()
+
+        st.write(f"Top Song of {date.month}/{date.day}/{date.year}")
+        song = sp.search(song_of_the_day)
+        st.write(song_of_the_day)
+#        st.write(f"Track: {song['tracks']['items'][0]['title']} by {song['tracks']['items'][0]['artists']}")

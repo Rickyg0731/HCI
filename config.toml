@@ -1,0 +1,11 @@
+[theme]
+
+primaryColor = "#AA4A44"
+#backgroundColor = "#2B2B2B"
+backgroundColor = "#17162e"
+#backgroundColor = "#191414"
+secondaryBackgroundColor = "#344C5C"
+#textColor = "#473c4f"  #000000
+textColor = "#FFFFFF"
+font = "sans serif"
+#Sternbach ufc font
